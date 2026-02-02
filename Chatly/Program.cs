@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 var builder = Host.CreateDefaultBuilder(args);
 
 builder.ConfigureAppConfiguration(config => 
-    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
         .AddUserSecrets<Program>());
 
 builder.ConfigureServices(services =>
@@ -17,4 +17,4 @@ builder.ConfigureServices(services =>
 var host = builder.Build();
 
 var application = host.Services.GetRequiredService<Application>();
-await application.InvokeAsync();
+await application.RunAsync();

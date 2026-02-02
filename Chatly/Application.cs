@@ -6,16 +6,13 @@ namespace Chatly;
 
 public class Application(IConfiguration configuration, ILogger<Application> logger)
 {
-    private readonly IConfiguration _configuration = configuration;
-    private readonly ILogger<Application> _logger = logger;
-
-    public async Task InvokeAsync()
+    public async Task RunAsync()
     {
-        var azureEndpoint = _configuration["Azure:Endpoint"] ?? throw new InvalidOperationException("Azure:Endpoint is not configured.");
-        var apiKey = _configuration["Azure:ApiKey"] ?? throw new InvalidOperationException("Azure:ApiKey is not configured.");
-        var deploymentName = _configuration["Azure:DeploymentName"] ?? throw new InvalidOperationException("Azure:DeploymentName is not configured.");        
+        var azureEndpoint = configuration["Azure:Endpoint"] ?? throw new InvalidOperationException("Azure:Endpoint is not configured.");
+        var apiKey = configuration["Azure:ApiKey"] ?? throw new InvalidOperationException("Azure:ApiKey is not configured.");
+        var deploymentName = configuration["Azure:DeploymentName"] ?? throw new InvalidOperationException("Azure:DeploymentName is not configured.");        
 
-        _logger.LogInformation("Starting application with Azure Endpoint: {Endpoint}, Deployment: {Deployment}", azureEndpoint, deploymentName);
+        logger.LogInformation("Starting application with Azure Endpoint: {Endpoint}, Deployment: {Deployment}", azureEndpoint, deploymentName);
 
         IChatClient client =
             new ChatClientBuilder(
@@ -69,7 +66,7 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
 
     private string GetWeather(string location)
     {
-        _logger.LogInformation("Getting weather for location: {Location}", location);
+        logger.LogInformation("Getting weather for location: {Location}", location);
         var weathers = new[] { "sunny", "cloudy", "rainy", "windy", "stormy" };
         var random = new Random();
         var weather = weathers[random.Next(weathers.Length)];
