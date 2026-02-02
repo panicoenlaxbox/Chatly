@@ -1,3 +1,4 @@
+using System.ClientModel.Primitives;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -10,15 +11,33 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
     {
         var azureEndpoint = configuration["Azure:Endpoint"] ?? throw new InvalidOperationException("Azure:Endpoint is not configured.");
         var apiKey = configuration["Azure:ApiKey"] ?? throw new InvalidOperationException("Azure:ApiKey is not configured.");
-        var deploymentName = configuration["Azure:DeploymentName"] ?? throw new InvalidOperationException("Azure:DeploymentName is not configured.");        
+        var deploymentName = configuration["Azure:DeploymentName"] ?? throw new InvalidOperationException("Azure:DeploymentName is not configured.");
 
         logger.LogInformation("Starting application with Azure Endpoint: {Endpoint}, Deployment: {Deployment}", azureEndpoint, deploymentName);
 
-        IChatClient client =
+        using var socketsHttpHandler = new SocketsHttpHandler();
+        using var httpFileHandler = new HttpFileHandler("log.http",
+        // ["api-key"]
+        []
+        )
+        {
+            InnerHandler = socketsHttpHandler
+        };
+
+        using var httpClient = new HttpClient(httpFileHandler);
+        PipelineTransport transport = new HttpClientPipelineTransport(httpClient);
+
+        using IChatClient client =
             new ChatClientBuilder(
                 new Azure.AI.OpenAI.AzureOpenAIClient(
                     new Uri(azureEndpoint),
-                    new Azure.AzureKeyCredential(apiKey)).GetChatClient(deploymentName).AsIChatClient())
+                    new Azure.AzureKeyCredential(apiKey),
+                    new Azure.AI.OpenAI.AzureOpenAIClientOptions()
+                    {
+                        Transport = transport
+                    }
+                ).GetChatClient(deploymentName)
+                .AsIChatClient())
             .UseFunctionInvocation()
             .Build();
 
