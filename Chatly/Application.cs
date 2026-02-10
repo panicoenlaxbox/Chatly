@@ -108,7 +108,7 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
                            |___/ 
         ");
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("        💬  AI-Powered Chat Assistant  💬");
+        Console.WriteLine("        💬 AI-Powered Chat Assistant 💬");
         Console.ResetColor();
         Console.WriteLine();
     }
