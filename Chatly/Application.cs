@@ -9,6 +9,8 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
 {
     public async Task RunAsync()
     {
+        DisplayLogo();
+        
         var azureEndpoint = configuration["Azure:Endpoint"] ?? throw new InvalidOperationException("Azure:Endpoint is not configured.");
         var apiKey = configuration["Azure:ApiKey"] ?? throw new InvalidOperationException("Azure:ApiKey is not configured.");
         var deploymentName = configuration["Azure:DeploymentName"] ?? throw new InvalidOperationException("Azure:DeploymentName is not configured.");
@@ -90,5 +92,24 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
         var random = new Random();
         var weather = weathers[random.Next(weathers.Length)];
         return $"The weather in {location} is {weather}.";
+    }
+
+    private void DisplayLogo()
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine(@"
+   _____ _           _   _       
+  / ____| |         | | | |      
+ | |    | |__   __ _| |_| |_   _ 
+ | |    | '_ \ / _` | __| | | | |
+ | |____| | | | (_| | |_| | |_| |
+  \_____|_| |_|\__,_|\__|_|\__, |
+                            __/ |
+                           |___/ 
+        ");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("        💬  AI-Powered Chat Assistant  💬");
+        Console.ResetColor();
+        Console.WriteLine();
     }
 }
