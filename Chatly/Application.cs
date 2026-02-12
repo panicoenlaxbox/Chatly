@@ -2,12 +2,46 @@ using System.ClientModel.Primitives;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
 
 namespace Chatly;
 
 public class Application(IConfiguration configuration, ILogger<Application> logger)
 {
     public async Task RunAsync()
+    {
+        AnsiConsole.Write(
+            new FigletText("Chatly")
+                .Centered()
+                .Color(Color.Blue));
+
+        AnsiConsole.MarkupLine("[dim]A simple .NET console application for interacting with Azure OpenAI[/]");
+        AnsiConsole.WriteLine();
+
+        while (true)
+        {
+            var choice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[green]What would you like to do?[/]")
+                    .AddChoices(new[] {
+                        "Start Chat",
+                        "Exit"
+                    }));
+
+            if (choice == "Exit")
+            {
+                AnsiConsole.MarkupLine("[yellow]Goodbye![/]");
+                break;
+            }
+
+            if (choice == "Start Chat")
+            {
+                await StartChatAsync();
+            }
+        }
+    }
+
+    private async Task StartChatAsync()
     {
         var azureEndpoint = configuration["Azure:Endpoint"] ?? throw new InvalidOperationException("Azure:Endpoint is not configured.");
         var apiKey = configuration["Azure:ApiKey"] ?? throw new InvalidOperationException("Azure:ApiKey is not configured.");
@@ -55,11 +89,17 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
             """)
         };
 
-        Console.WriteLine("Write 'exit' to quit the application.");
+        AnsiConsole.WriteLine();
+        var panel = new Panel("[blue]Chat Session Started[/]")
+            .Border(BoxBorder.Rounded)
+            .BorderColor(Color.Blue);
+        AnsiConsole.Write(panel);
+        AnsiConsole.MarkupLine("[dim]Type 'exit' to return to the main menu.[/]");
+        AnsiConsole.WriteLine();
 
         while (true)
         {
-            Console.Write("User: ");
+            AnsiConsole.Markup("[green]User:[/] ");
             var userMessage = (Console.ReadLine() ?? string.Empty).Trim();
 
             if (userMessage.Equals("exit", StringComparison.CurrentCultureIgnoreCase))
@@ -79,8 +119,12 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
 
             messages.Add(new ChatMessage(ChatRole.Assistant, assistantMessage));
 
-            Console.WriteLine($"Assistant: {assistantMessage}");
+            AnsiConsole.MarkupLine($"[blue]Assistant:[/] {assistantMessage}");
         }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLine("[yellow]Chat session ended.[/]");
+        AnsiConsole.WriteLine();
     }
 
     private string GetWeather(string location)
