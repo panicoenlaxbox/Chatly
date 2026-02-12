@@ -119,7 +119,7 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
 
             messages.Add(new ChatMessage(ChatRole.Assistant, assistantMessage));
 
-            AnsiConsole.MarkupLine($"[blue]Assistant:[/] {assistantMessage}");
+            AnsiConsole.MarkupLine($"[blue]Assistant:[/] {Markup.Escape(assistantMessage)}");
         }
 
         AnsiConsole.WriteLine();
