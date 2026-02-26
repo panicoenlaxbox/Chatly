@@ -1,4 +1,5 @@
 using System.ClientModel.Primitives;
+using System.ComponentModel;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,9 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
             InnerHandler = socketsHttpHandler
         };
 
+        // Microsoft.Extensions.AI
+        // Microsoft Agent Framework
+
         using var httpClient = new HttpClient(httpFileHandler);
         PipelineTransport transport = new HttpClientPipelineTransport(httpClient);
 
@@ -44,7 +48,7 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
         ChatOptions options = new()
         {
             Tools = [
-                AIFunctionFactory.Create((string location) => GetWeather(location), "get_weather", "Get the current weather for a given location")
+                AIFunctionFactory.Create((string location, WeatherHint hint) => GetWeather(location, hint), "get_weather", "Get the current weather for a given location")
             ]
         };
 
@@ -83,12 +87,18 @@ public class Application(IConfiguration configuration, ILogger<Application> logg
         }
     }
 
-    private string GetWeather(string location)
+    private string GetWeather(string location, WeatherHint hint)
     {
-        logger.LogInformation("Getting weather for location: {Location}", location);
+        logger.LogInformation("Getting weather for location: {Location} with hint: {Hint}", location, hint);
         var weathers = new[] { "sunny", "cloudy", "rainy", "windy", "stormy" };
         var random = new Random();
         var weather = weathers[random.Next(weathers.Length)];
         return $"The weather in {location} is {weather}.";
-    }
+    }    
+}
+
+public enum WeatherHint
+{
+    Exact,
+    Approximate
 }
